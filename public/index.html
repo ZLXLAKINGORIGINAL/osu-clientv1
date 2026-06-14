@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>osu!dev — Client Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{min-height:100vh;background:#0d0d1c;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;padding:2rem 1rem;overflow:hidden;position:relative}
+
+  /* Animated background orbs */
+  .orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
+  .o1{width:500px;height:500px;background:radial-gradient(circle,#ff55aa33,transparent 70%);top:-150px;right:-100px;animation:ob 6s ease-in-out infinite}
+  .o2{width:350px;height:350px;background:radial-gradient(circle,#aa44ff33,transparent 70%);bottom:-100px;left:-80px;animation:ob 6s ease-in-out infinite 2.5s}
+  .o3{width:200px;height:200px;background:radial-gradient(circle,#ff66aa22,transparent 70%);top:40%;left:20%;animation:ob 4s ease-in-out infinite 1s}
+  @keyframes ob{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+
+  /* Card */
+  .card{background:rgba(19,19,42,0.97);border:1px solid #ff55aa28;border-radius:24px;padding:2.8rem 2.2rem;width:100%;max-width:420px;position:relative;z-index:1;backdrop-filter:blur(20px)}
+
+  /* Logo */
+  .logo{text-align:center;margin-bottom:2rem}
+  .ring{width:68px;height:68px;margin:0 auto .8rem;animation:spin 7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .brand{font-family:'Nunito',sans-serif;font-size:1.75rem;font-weight:900;color:#fff;letter-spacing:-1px}
+  .brand em{color:#ff66aa;font-style:normal}
+  .sub{font-size:.72rem;color:#ffffff44;letter-spacing:.12em;text-transform:uppercase;margin-top:3px}
+
+  /* Tabs */
+  .tabs{display:flex;background:#ffffff09;border-radius:13px;padding:3px;gap:3px;margin-bottom:1.8rem}
+  .tb{flex:1;padding:.48rem;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;color:#ffffff44;background:transparent;transition:all .2s}
+  .tb.on{background:linear-gradient(135deg,#ff66aa,#cc44ff);color:#fff;box-shadow:0 4px 16px #ff66aa30}
+
+  /* Form */
+  label{font-size:.72rem;font-weight:600;color:#ffffff50;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:.4rem}
+  input{width:100%;padding:.7rem 1rem;background:#ffffff08;border:1px solid #ffffff12;border-radius:11px;color:#fff;font-size:.9rem;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s,background .2s;margin-bottom:1rem}
+  input::placeholder{color:#ffffff28}
+  input:focus{border-color:#ff66aa;background:#ff66aa0c}
+
+  /* Button */
+  .btn{width:100%;padding:.78rem;background:linear-gradient(135deg,#ff66aa,#cc44ff);border:none;border-radius:13px;color:#fff;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;margin-top:.2rem;transition:transform .15s,box-shadow .2s;letter-spacing:.03em;position:relative;overflow:hidden}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px #ff66aa40}
+  .btn:active{transform:scale(.97)}
+
+  /* Messages */
+  .msg{text-align:center;font-size:.82rem;margin-top:.9rem;padding:.55rem .9rem;border-radius:9px;display:none}
+  .err{background:#ff333322;color:#ff7777;display:block}
+  .ok{background:#33ff8822;color:#55ffaa;display:block}
+
+  /* Logged-in view */
+  .hi{display:none;text-align:center}
+  .av{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#ff66aa,#cc44ff);display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-size:1.9rem;font-weight:900;color:#fff;margin:0 auto 1rem;box-shadow:0 0 40px #ff66aa35}
+  .wt{font-family:'Nunito',sans-serif;font-size:1.25rem;font-weight:900;color:#fff;margin-bottom:.35rem}
+  .badge{display:inline-block;background:#ff66aa15;border:1px solid #ff66aa40;color:#ff99cc;font-size:.72rem;font-weight:600;padding:.22rem .75rem;border-radius:20px;margin-bottom:1.3rem}
+  .sg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.3rem}
+  .sb{background:#ffffff07;border-radius:12px;padding:.75rem .9rem}
+  .sl{font-size:.68rem;color:#ffffff44;text-transform:uppercase;letter-spacing:.06em}
+  .sv{font-family:'Nunito',sans-serif;font-size:1.05rem;font-weight:900;color:#fff;margin-top:3px}
+  .cs{background:#080815;border:1px solid #ff66aa18;border-radius:13px;padding:1rem 1.1rem;margin-top:1rem;text-align:left}
+  .cl{font-size:.68rem;color:#ff66aa;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.6rem}
+  .cb{font-family:'Courier New',monospace;font-size:.72rem;color:#ffffff66;line-height:1.7;white-space:pre}
+  .cb .k{color:#bb88ff}
+  .cb .v{color:#66ffaa}
+  .cb .c{color:#ffffff33}
+  .lo{background:#ffffff08;border:1px solid #ffffff12;color:#ffffff55;padding:.52rem 1.5rem;border-radius:9px;font-size:.82rem;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;margin-top:1.2rem}
+  .lo:hover{background:#ff333318;border-color:#ff333344;color:#ff7777}
+
+  /* Spinner inside button */
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid #ffffff55;border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+</style>
+</head>
+<body>
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+<div class="orb o3"></div>
+
+<div class="card">
+  <div class="logo">
+    <div class="ring">
+      <svg viewBox="0 0 68 68" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="ga" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff66aa"/><stop offset="100%" stop-color="#cc44ff"/></linearGradient>
+          <linearGradient id="gb" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff66aa" stop-opacity=".75"/><stop offset="100%" stop-color="#cc44ff" stop-opacity=".75"/></linearGradient>
+        </defs>
+        <circle cx="34" cy="34" r="30" stroke="url(#ga)" stroke-width="2.5" fill="none" stroke-dasharray="8 4"/>
+        <circle cx="34" cy="34" r="19" fill="url(#gb)"/>
+        <circle cx="34" cy="34" r="8" fill="rgba(255,255,255,.93)"/>
+      </svg>
+    </div>
+    <div class="brand">osu<em>!</em>dev</div>
+    <div class="sub">Custom Client Portal</div>
+  </div>
+
+  <!-- AUTH AREA -->
+  <div id="auth">
+    <div class="tabs">
+      <button class="tb on" id="tl" onclick="tab('login')">Login</button>
+      <button class="tb" id="tr" onclick="tab('reg')">Register</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="lf">
+      <label>Username</label>
+      <input id="lu" type="text" placeholder="Dein Username" autocomplete="username"/>
+      <label>Passwort</label>
+      <input id="lp" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <button class="btn" id="lb" onclick="doLogin()">Einloggen</button>
+      <div class="msg" id="lm"></div>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="rf" style="display:none">
+      <label>Username</label>
+      <input id="ru" type="text" placeholder="Wähle einen Namen (3–20 Zeichen)" autocomplete="username"/>
+      <label>E-Mail</label>
+      <input id="re" type="email" placeholder="deine@email.com" autocomplete="email"/>
+      <label>Passwort</label>
+      <input id="rp" type="password" placeholder="Min. 6 Zeichen" autocomplete="new-password" onkeydown="if(event.key==='Enter')doReg()"/>
+      <button class="btn" id="rb" onclick="doReg()">Account erstellen</button>
+      <div class="msg" id="rm"></div>
+    </div>
+  </div>
+
+  <!-- LOGGED IN -->
+  <div class="hi" id="hi">
+    <div class="av" id="av">?</div>
+    <div class="wt">Willkommen, <span id="dn"></span>!</div>
+    <div class="badge" id="bd"></div>
+    <div class="sg">
+      <div class="sb"><div class="sl">Status</div><div class="sv" style="color:#55ff99">Online</div></div>
+      <div class="sb"><div class="sl">Player ID</div><div class="sv" id="pid">—</div></div>
+    </div>
+    <div class="cs">
+      <div class="cl">C# — DevelopmentEndpointConfiguration</div>
+      <div class="cb" id="ccode"></div>
+    </div>
+    <button class="lo" onclick="doLogout()">Logout</button>
+  </div>
+</div>
+
+<script>
+const API = ''; // leer = gleiche Domain (nach dem Deploy)
+
+function tab(t){
+  document.getElementById('tl').className='tb'+(t==='login'?' on':'');
+  document.getElementById('tr').className='tb'+(t==='reg'?' on':'');
+  document.getElementById('lf').style.display=t==='login'?'':'none';
+  document.getElementById('rf').style.display=t==='reg'?'':'none';
+}
+
+function setMsg(id,txt,type){
+  const el=document.getElementById(id);
+  el.textContent=txt;
+  el.className='msg '+(type==='err'?'err':'ok');
+}
+
+function setLoading(btnId,loading,label){
+  const b=document.getElementById(btnId);
+  b.disabled=loading;
+  b.innerHTML=loading?`<span class="spinner"></span> Bitte warten…`:label;
+}
+
+async function doReg(){
+  const u=document.getElementById('ru').value.trim();
+  const e=document.getElementById('re').value.trim();
+  const p=document.getElementById('rp').value;
+  setLoading('rb',true,'Account erstellen');
+  try{
+    const r=await fetch(API+'/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,email:e,password:p})});
+    const d=await r.json();
+    if(!r.ok)return setMsg('rm',d.error||'Fehler','err');
+    localStorage.setItem('osu_token',d.token);
+    showUser(d.user,d.token);
+  }catch{
+    setMsg('rm','Server nicht erreichbar','err');
+  }finally{
+    setLoading('rb',false,'Account erstellen');
+  }
+}
+
+async function doLogin(){
+  const u=document.getElementById('lu').value.trim();
+  const p=document.getElementById('lp').value;
+  setLoading('lb',true,'Einloggen');
+  try{
+    const r=await fetch(API+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const d=await r.json();
+    if(!r.ok)return setMsg('lm',d.error||'Fehler','err');
+    localStorage.setItem('osu_token',d.token);
+    showUser(d.user,d.token);
+  }catch{
+    setMsg('lm','Server nicht erreichbar','err');
+  }finally{
+    setLoading('lb',false,'Einloggen');
+  }
+}
+
+function doLogout(){
+  localStorage.removeItem('osu_token');
+  document.getElementById('hi').style.display='none';
+  document.getElementById('auth').style.display='';
+  document.getElementById('lu').value='';
+  document.getElementById('lp').value='';
+  setMsg('lm','','');
+}
+
+function showUser(user,token){
+  document.getElementById('auth').style.display='none';
+  document.getElementById('hi').style.display='block';
+  document.getElementById('dn').textContent=user.username;
+  document.getElementById('av').textContent=user.username.slice(0,2).toUpperCase();
+  document.getElementById('bd').textContent='Registriert am '+new Date().toLocaleDateString('de-DE');
+  document.getElementById('pid').textContent='#'+user.id;
+  document.getElementById('ccode').innerHTML=
+    '<span class="c">// DevelopmentEndpointConfiguration.cs</span>\n'+
+    '<span class="k">WebsiteUrl</span> = <span class="v">"https://DEINE-DOMAIN.com"</span>;\n'+
+    '<span class="k">APIUrl</span>     = <span class="v">"https://DEINE-DOMAIN.com"</span>;\n'+
+    '<span class="k">// Token für Requests:</span>\n'+
+    '<span class="c">// Authorization: Bearer '+token.slice(0,30)+'…</span>';
+}
+
+// Auto-login wenn Token vorhanden
+(async function(){
+  const token=localStorage.getItem('osu_token');
+  if(!token)return;
+  try{
+    const r=await fetch(API+'/api/me',{headers:{Authorization:'Bearer '+token}});
+    if(r.ok){const d=await r.json();showUser(d.user,token)}
+    else localStorage.removeItem('osu_token');
+  }catch{}
+})();
+</script>
+</body>
+</html>
